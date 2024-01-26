@@ -1,23 +1,51 @@
 import logo from './logo.svg';
 import './App.css';
+import CardList from './components/cardlist/cardlist.component';
+import React, { useState, useEffect } from 'react';
+import SearchBar from './components/SearchBar/searchbar.component';
+import axios from 'axios';
 
 function App() {
+  const[monsters, setMonsters] = useState([]);
+  const [filteredMonsters, setFilteredMonsters] = useState([]);
+
+  const[searchInput, setSearchInput] = useState("");
+  useEffect(() => {
+    const fetchMonsters = async () => {
+      const response = await axios.get("https://jsonplaceholder.typicode.com/users")
+      //const monsters = await response.json();
+      console.log(response.data);
+      setMonsters(response.data);
+    };
+    fetchMonsters();
+  }, []);//the [] is SUPPER IMPORTANT
+  useEffect(() => {
+    let filtered = [];
+    if(searchInput === "") {
+      filtered = monsters
+    } else {
+      filtered = monsters.filter(monster =>
+        monster.name.toLowerCase().includes(searchInput.toLowerCase())
+      );
+
+    }
+    setFilteredMonsters(filtered);
+  }, [monsters, searchInput]);//whenever our search changes or monsters change we update
+   
+  const handleInput = e => {
+    //console.log(e.target.value)
+    setSearchInput(e.target.value)
+  };
+
+    
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Monster Rolodex</h1>
+      <SearchBar
+        placeholder='Search Monster'
+        handleInput={handleInput}
+      />
+      <CardList monsters={filteredMonsters}></CardList>
     </div>
   );
 }
